@@ -2,6 +2,9 @@
 
 This plugin allows content in a Google docs document to be exported to [Anki](https://apps.ankiweb.net) flashcards.
 
+![image](https://user-images.githubusercontent.com/1998726/213298694-54ddb150-3e4b-4bc6-be22-95b78f4ab912.png)
+
+
 # Features
 
 - Scans the selected part of the document, or the whole document if nothing is selected.
@@ -16,22 +19,51 @@ This plugin allows content in a Google docs document to be exported to [Anki](ht
     - Nested lists work
     - Ordered (with numbers) does not
 
+# Installation
+
+## Host bundle.js
+- You need to host the **bundle.js** file on a server somewhere.
+  - Google allows free hosting of up to 5GB of traffic a month (which should be plenty for this use case)
+  - See [Google's documentation](https://cloud.google.com/storage/docs/hosting-static-website)
+- Enter the URL of the hosted bundle.js into **sidebar.html** (line 211)
+  - "<script src="[URL TO REACH bundle.js]"></script>"
+
+## Install code into document
+- Create or open a Google docs document.
+- Open [Extensions]/[Apps scripts]
+- Paste code from **code.gs** into the code file that is automatically created (replace the existing code).
+- Create a new HTML file.
+  - Name it "Sidebar" (html extension will be added automatically).
+  - Paste code from **Sidebar.html** into the file you created.
+- Close the document and re-open it.
+- Open Sidebar from [Extensions]/[Anki-Export]/[Show in Sidebar].
+  - Give the script the permissions it asks for.
+
 # Usage
 
 ## Format your content
 
 ### Front of cards
-All headings of the lowest level in a heading "tree" will be used as the 
+- All headings of the lowest level in a heading "tree" will be used as the 
 content for the Front of the card.
+- Headings above the lowest levels will be ignored but can still be useful to structure the content in the document.
+
+**Example:**
+- Heading 1 (ignored)
+  - Heading 2 (ignored)
+    - Heading 3 (Front)
+      - Content (Back) 
+
+See detailed example furher down.
 
 ### Back of cards
 All content under the lowest leveled headings will be used as content.
 
 ### Example
-This content:<br>
+**This content:**<br>
 <img width="705" alt="image" src="https://user-images.githubusercontent.com/1998726/213292753-a6e6440c-bb0f-4dae-b508-f279b0c4d250.png">
 
-Will generate these Notes:<br>
+**Will generate these Notes:**<br>
 <img width="317" alt="image" src="https://user-images.githubusercontent.com/1998726/213294441-8ec304d6-5fe3-4b91-8d73-a4931b945665.png">
  
 ## Find Notes
@@ -73,7 +105,7 @@ What drives the pain response in ileus?
 - Palpation will not make much difference 
   - Patient will experience discomfort on palpation
 <br>
- Pain will be non-specific in localisation
+Pain will be non-specific in localisation
 
 
 
