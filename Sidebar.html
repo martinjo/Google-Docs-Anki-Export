@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.3.0/dist/css/uikit.min.css" />
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.4.1/github-markdown.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.8.0/styles/github-gist.min.css" />
+    <style>
+     
+        
+        .cardsList
+        {
+          overflow: scroll;
+          margin: 0px;
+          padding: 0px;
+        }
+        
+        .cardItem
+        {  
+           border-style: solid;
+           border-width: 1px;
+           font-size: 18px;
+           padding: 5px;
+           list-style-type: none;
+        }
+        
+        .htmlPreview 
+        {
+          overflow: scroll;
+        }
+        
+        #app
+        {
+          display: grid;
+          height: 100vh;
+          max-width: 100vw;
+          grid-template-columns: 100%;
+          grid-template-rows: 1fr 12fr 6fr 1fr;
+        }
+        
+        .centeredContent
+        {
+          display: flex;
+          flex-direction: column;
+          align-content: space-evenly;
+          justify-content: space-evenly;
+          max-width: 100vw;
+          padding: 0px 5px 0px 5px;
+        }
+        
+        .alignedHorizontally
+        {
+          display: flex;
+          flex-direction: row;
+          align-content: space-evenly;
+          justify-content: space-evenly;
+          max-width: 100vw;
+          padding: 0px 5px 0px 5px;
+        }
+        
+        .topp
+        {
+          grid-row-start: 1;
+          grid-row-end: 1;
+          padding: 5px;
+          margin: 5px;
+        }
+        
+        .cardscontainer
+        {
+          grid-row-start: 2;
+          grid-row-end: 2;
+          padding: 0px 5px 0px 5px;
+          overflow: scroll;
+          max-width: 100vw;
+        }
+        
+        .selectedcard
+        {
+          grid-row-start: 3;
+          grid-row-end: 3;
+          overflow: scroll;
+          padding: 0px 5px 0px 5px;
+        }
+        
+        .bottomButtonBar
+        {
+          grid-row-start: 4;
+          grid-row-end: 4;
+          padding: 5px;
+          margin: 5px;
+        }
+        
+        .monospace
+        {
+          overflow: scroll;
+        }
+        
+        .monospace h1
+        {
+          font-family: monospace; font-size: 24px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 26.4px;
+        }
+        
+        .monospace h3 
+        { 
+          font-family: monospace; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px; 
+        }
+        
+        .monospace h4 
+        { 
+          font-family: monospace; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 13.4px; 
+        }
+        
+        .monospace p 
+        { 
+          font-family: monospace; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 12px; 
+        }
+        
+        .monospace blockquote 
+        { 
+          font-family: monospace; font-size: 21px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 30px; 
+        }
+        
+        .monospace pre 
+        { 
+          font-family: monospace; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400; line-height: 12.5714px; }
+        }
+        
+        .monospace ul
+        { 
+          font-family: monospace; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400;}
+        } 
+        
+        .monospace li 
+        { 
+          font-family: monospace; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400; }
+        }        
+        
+        .monospace li li
+        { 
+          font-family: monospace; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400;}
+        }
+        
+        .monospace li li li
+        { 
+          font-family: monospace; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400;}
+        }
+        
+        .monospace li li li li
+        { 
+          font-family: monospace; font-size: 13px; font-style: normal; font-variant: normal; font-weight: 400;}
+        } 
+        
+        .monospace ul, ol, li 
+        {
+          padding: 0;
+          margin: 0;
+          line-height: 0;
+        }
+    
+        #cards .ui-selecting { background: #FECA40; }
+        #cards .ui-selected { background: #FFC678; }
+    </style>
+</head>
+
+<div v-cloak id="app">   
+    <div class="topp">
+      <div class="centeredContent">
+        <button :disabled="progress>=0" class="blue" id="refresh">Find cards</button>
+        <progress v-if="progress > 0" id="progressbar" class="uk-progress" :value="progress" min="0" max="100" style="margin: 5px 0px 5px 0px; padding: 1px;"></progress>
+        <p style="margin:5px; padding:0px;" v-if="status"> {{ status }} </p>
+      </div>
+    </div>
+    <div class="cardscontainer">
+      <!--ul id="cards" class="cardsList"/-->
+      <table v-if="cards.length>0" id="cards" style="margin:5px;padding:0px;" class="uk-table uk-table-small uk-table-hover">
+        <thead>
+          <tr>
+            <th>Front</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <tr v-for="item in cards" @click="selectCard(item)">
+            <td>{{ item.front }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="selectedcard">
+      <hr v-if="selectedCard" style="margin:0;padding:0px;">
+      <h4 class="monospace" style="margin:0;padding:5px;" v-if="selectedCard">{{ selectedCard.front }}</h4>
+      <div v-if="selectedCard" class="monospace" v-html="selectedCard.html"></div>
+    </div>
+    <div class="bottomButtonBar">
+      <div class="alignedHorizontally">
+        <button v-if="exportEnabled" @click="downloadApkg()" class="blue" id="export">Download .apgk</button>
+        <button v-if="exportEnabled" @click="downloadCsv()" class="blue" id="export">Download zipped .csv</button>
+      </div>
+    </div> 
+     
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <!-- UIkit JS -->
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.3.0/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.3.0/dist/js/uikit-icons.min.js"></script>
+    <!-- Please replace the src below with the URL to a hosted bundle.js -->
+    <script src="[URL TO REACH bundle.js]"></script>
+
+    <script>
+
+        $(function() {
+            $('#refresh').click(findFlashcards);
+        });
+        
+        var app = new Vue({
+             el: '#app',
+             data: 
+             {
+               status: "",
+               progress: -1, // < 0 == hidden
+               cards: [],
+               selectedCard: null,
+               exportEnabled: false
+             },
+             methods:
+             {
+               selectCard:function(card)
+               {
+                  app.selectedCard = card;
+               },
+               exportToGoogleDrive() 
+               {
+                  app.status = "Exporting to Drive...";
+                  google.script.run
+                  .withSuccessHandler(onExportSuccess)
+                  .withFailureHandler(onExportFailed)
+                  .exportToGoogleDrive({cards: flashCards, images:imagesJson});
+                },
+                downloadApkg()
+                {
+                  // add cards
+                  //var formats = [ ankiFrontTemplate, ankiBackTemplate, ankiCss];
+                  //var json = JSON.stringify(formats);
+                  //console.log(json);
+                  //var ankiTemplate = new AppLib.Template({questionFormat: ankiFrontTemplate, answerFormat: ankiBackTemplate, css: ankiCss});
+                  //console.log(ankiTemplate);
+                  var apkg = new AppLib.AnkiExport(deckName);
+                  for(var i=0;i<flashCards.length;i++)
+                  {
+                    var card = card = flashCards[i];
+                    apkg.addCard(card.front, card.html);
+                  }
+                  // add images to anki package
+                  for(var j=0;j<images.length;j++)
+                  {
+                    var image = images[j];
+                    var imgBlob = base64toBlob(image.data, image.type);
+                    apkg.addMedia(image.name, imgBlob);
+                  }
+                  
+                  apkg
+                  .save()
+                  .then(zip => 
+                  {
+                    saveAs(zip, deckName + ".apkg");
+                    app.status = ".apkg file generated!";
+                  })
+ //                 .catch(err > console.log(err.stack || err));
+                },
+                downloadCsv()
+                {
+                  var csv = createCsvFromCards(flashCards);
+                  var zip = new AppLib.JSZip();
+                  zip.file(deckName + ".csv", csv);
+                  for(var i=0;i<images.length;i++)
+                  {
+                    var imgBlob = base64toBlob(images[i].data, images[i].type);
+                    zip.file(images[i].name, imgBlob);
+                  }
+                  zip.generateAsync({type:"blob"})
+                  .then(function(content) {
+                    // see FileSaver.js
+                    saveAs(content, deckName +".zip");
+                  });
+                  
+                }
+             }
+           });  
+        var deckName = "";
+        var flashCards = [];
+        var images;
+        var imagesJson;
+        var timer;
+        
+  /*      function exportToGoogleDrive() 
+        {
+            app.status = "Exporting to Drive...";
+            google.script.run
+                .withSuccessHandler(onExportSuccess)
+                .withFailureHandler(onExportFailed)
+                .exportToGoogleDrive({cards: flashCards, images:images});
+        }*/
+        
+        function onExportSuccess()
+        {
+          app.status = "Files exported to Drive!";
+        }
+        
+        function onExportFailed()
+        {
+          app.status = "Export failed!";
+        }
+
+        function findFlashcards() 
+        {
+            app.cards = [];
+            app.selectedCard = null;
+            app.exportEnabled = false;
+           
+            app.progress = 0;
+            app.status = "Scanning document";
+
+            google.script.run
+                .withSuccessHandler(onFlashcardsFound)
+                .withFailureHandler(onNoFlashcardsFound)
+                .extractHtmlCardsFromDocument();
+            
+            timer = setInterval(function()
+            {
+                google.script.run
+                .withSuccessHandler(function(status)
+                  { 
+                    if(status.total != "unknown" && app.progress >= 0)
+                    {
+                      app.progress = (status.current/status.total)*100.0;
+                      app.status = "Processing card: " + status.current + " of " + status.total;
+                    }
+                  })
+                .readStatusFromCache();
+            }, 500);
+        }
+        
+        function onNoFlashcardsFound()
+        {
+           app.status = "No cards found in document";
+           app.progress = -1;
+           app.exportEnabled = false;
+           clearInterval(timer);
+        }
+        
+        function onFlashcardsFound(cardsAndImages)
+        {
+           // stop status update timer
+           clearInterval(timer);
+           // update status text and progress bar
+           app.status = "";
+           app.progress = -1;
+           
+           deckName = cardsAndImages.deckName;
+           flashCards = cardsAndImages.cards;
+           app.cards = flashCards;
+           imagesJson = cardsAndImages.images;
+           images = JSON.parse(imagesJson);
+           
+           app.selectedCard = flashCards[0];
+           app.exportEnabled = true;
+        }
+        
+        function base64toBlob(base64Data, contentType)
+        {
+          contentType = contentType || '';
+          var sliceSize = 1024;
+          var byteCharacters = atob(base64Data);
+          var bytesLength = byteCharacters.length;
+          var slicesCount = Math.ceil(bytesLength / sliceSize);
+          var byteArrays = new Array(slicesCount);
+          
+          for (var sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) 
+          {
+            var begin = sliceIndex * sliceSize;
+            var end = Math.min(begin + sliceSize, bytesLength);
+            
+            var bytes = new Array(end - begin);
+            for (var offset = begin, i = 0; offset < end; ++i, ++offset) 
+            {
+              bytes[i] = byteCharacters[offset].charCodeAt(0);
+            }
+            byteArrays[sliceIndex] = new Uint8Array(bytes);
+          }
+          return new Blob(byteArrays, { type: contentType });
+        }
+        
+        function createCsvFromCards(cards)
+        {
+          var output = [];
+          for(var i=0;i<cards.length;i++)
+          {
+            output.push(cards[i].front);
+            output.push('§');
+            output.push(cards[i].html);
+            output.push("\n\n");
+          }
+          return output.join('');
+        }
+        
+
+        /**
+         * Inserts a div that contains an error message after a given element.
+         *
+         * @param msg The error message to display.
+         * @param element The element after which to display the error.
+         */
+        function showError(msg, element) {
+            var div = $('<div id="error" class="error">' + msg + '</div>');
+            $(element).after(div);
+        }
+        
+        var ankiFrontTemplate = `<div id="io-header">
+        <table>
+        </tr>
+        <th>{{Image1}}</th>
+        <th>{{Image2}}</th>
+        <tr>
+        </table>
+        {{Framsida}}
+        </div>
+        <br>
+        <span class="timer" id="s2" style="font-size:16px; color: #A6ABB9;"></span>
+        <script>
+        function countdown( elementName, minutes, seconds )
+        {
+        var element, endTime, hours, mins, msLeft, time;
+        function twoDigits( n )
+        {
+        return (n <= 9 ? "0" + n : n); 
+        }
+        function updateTimer()
+        {
+        msLeft = endTime - (+new Date);
+        if ( msLeft < 1000 ) {
+        element.innerHTML = "<span style='color:#CC5B5B'>ÖKA!</span>";
+        } else {
+        time = new Date( msLeft );
+        hours = time.getUTCHours();
+        mins = time.getUTCMinutes();
+        element.innerHTML = (hours ? hours + ':' + twoDigits( mins ) : mins) + ':' + twoDigits( time.getUTCSeconds() );
+        setTimeout( updateTimer, time.getUTCMilliseconds() + 500 );
+        }
+        }
+        element = document.getElementById( elementName );
+        endTime = (+new Date) + 1000 * (60*minutes + seconds) + 500;
+        updateTimer();
+        }
+        countdown("s2", 0, 15 ); //2nd value is the minute, 3rd is the seconds
+        <\/script>`;
+        
+        var ankiBackTemplate = `{{FrontSide}}
+
+{{Baksida}}
+<br>
+{{#Extra 1}}
+Alt:
+<hr>
+{{/Extra 1}}
+{{Extra 1}}
+
+<span class="timer" id="s2" style='font-size:16px; color: #A6ABB9;'></span>
+<script>
+function countdown( elementName, minutes, seconds )
+{
+    var element, endTime, hours, mins, msLeft, time;
+    function twoDigits( n )
+    {
+        return (n <= 9 ? "0" + n : n); 
+    }
+    function updateTimer()
+    {
+        msLeft = endTime - (+new Date);
+        if ( msLeft < 1000 ) {
+            element.innerHTML = "<span style='color:#CC5B5B'>skynda på, inte maska så!</span>";
+        } else {
+            time = new Date( msLeft );
+            hours = time.getUTCHours();
+            mins = time.getUTCMinutes();
+            element.innerHTML = (hours ? hours + ':' + twoDigits( mins ) : mins) + ':' + twoDigits( time.getUTCSeconds() );
+            setTimeout( updateTimer, time.getUTCMilliseconds() + 500 );
+        }
+    }
+    element = document.getElementById( elementName );
+    endTime = (+new Date) + 1000 * (60*minutes + seconds) + 500;
+    updateTimer();
+}
+
+countdown("s2", 0, 15 ); //2nd value is the minute, 3rd is the seconds
+
+<\/script>`;
+ 
+    var ankiCss = `html { overflow: scroll; overflow-x: hidden; }
+/* CONTAINER FOR YOUR CARDS */
+#kard {
+    padding: 0px 0px;
+    max-width: 700px; /* CHANGE CARD SIZE HERE */
+    margin: 0 auto; /* CENTERS THE CARD IN THE MIDDLE OF THE WINDOW */
+    word-wrap: break-word; /* BREAKS UP LONG WORKS */
+}
+
+/* APPLIES TO THE WHOLE CARD */
+.card {
+    font-family: Menlo, baskerville, sans;
+    font-size: 18px; /* FONT SIZE */
+    text-align: left; /* ALIGN TEXT */
+    color: #D7DEE9; /* FONT COLOR */
+    line-height: 1.6em;
+    background-color: #333B45; /* BACKGROUND COLOR */
+}
+/* STYLE FOR CLOZE DELETIONS */
+.cloze, .cloze b, .cloze u, .cloze i { font-weight: bold; color: MediumSeaGreen !important;}
+
+/* STYLE FOR EXTRA PORTION ON BACK OF CARD */
+#extra, #extra i { font-size: 15px; color:#D7DEE9; font-style: italic; }
+
+/* STYLE TAGS TO APPEAR WHEN HOVERING OVER TOP OF CARD */
+.tags { 
+    color: #A6ABB9;
+    opacity: 0;
+    font-size: 10px; 
+    width: 100%;
+    text-align: center;
+    text-transform: uppercase; 
+    position: fixed; 
+    padding: 0; 
+    top:0;  
+    right: 0;}
+.tags:hover { opacity: 1; position: fixed;}
+
+/* Colors for typed answer comparison */
+.typeGood { background: green; }
+.typeBad { background: blue; }
+.typeMissed { background: red; }
+
+/* IMAGE STYLE */
+img { display: block; max-width:80%; max-height:80vh; margin-left: auto; margin: 10px auto 10px auto;}
+img:active { width: 50%; max-height: 50% }
+tr {font-size: 12px; }
+
+
+
+
+/* COLOR ACCENTS FOR BOLD-ITALICS-UNDERLINE */
+b { color: #C695C6 !important; } /* BOLD STYLE */
+u { text-decoration: none; color: #5EB3B3;} /* UNDERLINE STYLE */
+i  { color: IndianRed; } /* ITALICS STYLE */
+a { color: LightGray !important; text-decoration: none; font-size: 10px; font-style: normal; } /* LINK STYLE */
+
+/* ADJUSTMENT FOR MOBILE DEVICES */
+.mobile .card { color: #D7DEE9; background-color: #333B45; } 
+.mobile .tags:hover { opacity: 1; position: relative;}
+.mobile .card img:active { width: inherit; max-height: none;}`;
+        
+        
+    </script>
+</div>
+
+</html>
