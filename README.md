@@ -2,7 +2,7 @@
 
 This plugin allows content in a Google docs document to be exported to [Anki](https://apps.ankiweb.net) flashcards.
 
-![image](https://user-images.githubusercontent.com/1998726/213298694-54ddb150-3e4b-4bc6-be22-95b78f4ab912.png)
+<img width="1239" alt="image" src="https://user-images.githubusercontent.com/1998726/213300727-d555f744-dbc4-4c3d-b19d-b4dcaf564b24.png">
 
 
 # Features
