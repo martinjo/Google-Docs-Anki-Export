@@ -39,7 +39,7 @@ What drives the pain response in ileus?
 - Palpation will not make much difference 
   - Patient will experience discomfort on palpation
 <br>
-Pain will be non-specific in localisation
+**Pain will be non-specific in localisation**
 
   
 
